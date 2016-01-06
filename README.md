@@ -157,7 +157,7 @@ LSTM:
   buildModel
   updateOutput                        self.outputs[step], self.cells[ste] = self.recurrentModel:updateOutput(input, self.outputs[step-1], selfcells[step-1])
   backwardThroughTime
-  updateGradInputThroughTime(step)    self.gradInputs[maxSteps-1], self.gradPrevOutput, self.gradCells[step-2] =
+  updateGradInputThroughTime(step)    self.gradInputs[maxSteps-step], self.gradPrevOutput, self.gradCells[step-2] =
                                         self:getStepModule(step):updateGradInput(
                                           {self.inputs[step-1], self.outputs[step-2], self.cells[step-2]}, {self.gradOutputs[step-1], self.gradCells[step-1]})
   accGradParametersThroughTime
