@@ -111,34 +111,54 @@ Module:
   backwardThroughTime     modules:backwardThroughTime
   backwardOnline          modules:backwardOnline
   maxBPTTstep             modules:maxBPTTstep
-  stepClone
+  stepClone               return self:sharedClone()
 ```
 
 New classes:
 ```
-Recursor => AbstractRecurrent => Container => Module
 Sequencer => AbstractSequencer => Container => Module
+Recursor  => AbstractRecurrent => Container => Module
+LSTM      => AbstractRecurrent => Container => Module
 ```
 
 ```
 Recursor:
-  updateOutput
+  __init(module)                     self.recurrentModule = module; self.modules = {module}
+  updateOutput                       getStepModule (clones self.recurrentModule), stores input, stores output, increments step
   backwardThroughTime
   updateGradInputThroughTime
   accUpdateGradParametersThroughTime
-  backwardOnline   AbstractRecurrent.backwardOnline
+  sharedClone                        return self
+  backwardOnline                     AbstractRecurrent.backwardOnline
   forget
 
 AbstractRecurrent:
-  getStepModule(step)
+  getStepModule(step)  calls self.recurrentModule:stepClone(), stores in self.sharedClones
+      - stepClone is in `Module`, and basically does... nothing :-P
   maskZero
   updateGradInput
   accGradParameters
   backwardThroughTime  nop
   updateGradInputThroughTime nop
   accGradParametersThroughTime  nop
-  
-  
-```
+  accUpdateGradParametersThroughTime  nop
+  backwardUpdateThroughTime(lr)
+  updateParameters(lr)
+  recycle(offset)
+  forget(offset)
+  includingSharedClones(f)
+  type(type)
+  training
+  evaluate
+  backwardOnline
 
+LSTM:
+  __init  self.recurrentModule = self:buildModel()
+  buildModel
+  updateOutput
+  backwardThroughTime
+  updateGradInputThroughTime
+  accGradParametersThroughTime
+  accUpdateGradParameters
+```
 
