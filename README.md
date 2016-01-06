@@ -46,7 +46,8 @@ for s=1,seqLength do
   outputs[s] = net:forward(inputs[s])
 end
 for s=seqLength,1,-1 do
-  -- (get gradOutput from criteria, based on inputs[s] and targets[s]; invariant with non-rnn case, so we ignore it here)
+  -- (get gradOutput from criteria, based on inputs[s] and targets[s]
+  -- invariant with non-rnn case, so we ignore it here)
   net:backward(inputs[s], gradOutputs[s])
 end
 net:updateParameters(learningRate)
@@ -124,7 +125,8 @@ LSTM      => AbstractRecurrent => Container => Module
 ```
 Recursor:
   __init(module)                      self.recurrentModule = module; self.modules = {module}
-  updateOutput                        getStepModule (clones self.recurrentModule), stores input, stores output, increments step
+  updateOutput                        getStepModule (clones self.recurrentModule), stores input,
+                                      stores output, increments step
   backwardThroughTime
   updateGradInputThroughTime
   accUpdateGradParametersThroughTime
@@ -136,7 +138,8 @@ AbstractRecurrent:
   getStepModule(step)                 calls self.recurrentModule:stepClone(), stores in self.sharedClones
                                       - stepClone is in `Module`, and basically does... nothing :-P
   maskZero
-  updateGradInput                     self:updateGradInputThroughTime(self.updateGradInputStep, 1); self.updateGradInputStep--
+  updateGradInput                     self:updateGradInputThroughTime(self.updateGradInputStep, 1)
+                                      self.updateGradInputStep--
   accGradParameters
   backwardThroughTime                 nop
   updateGradInputThroughTime          nop
@@ -155,11 +158,13 @@ AbstractRecurrent:
 LSTM:
   __init                              self.recurrentModule = self:buildModel()
   buildModel
-  updateOutput                        self.outputs[step], self.cells[ste] = self.recurrentModel:updateOutput(input, self.outputs[step-1], selfcells[step-1])
+  updateOutput                        self.outputs[step], self.cells[ste] = self.recurrentModel:updateOutput(
+                                        input, self.outputs[step-1], selfcells[step-1])
   backwardThroughTime
   updateGradInputThroughTime(step)    self.gradInputs[maxSteps-step], self.gradPrevOutput, self.gradCells[step-2] =
                                         self:getStepModule(step):updateGradInput(
-                                          {self.inputs[step-1], self.outputs[step-2], self.cells[step-2]}, {self.gradOutputs[step-1], self.gradCells[step-1]})
+                                          {self.inputs[step-1], self.outputs[step-2], self.cells[step-2]},
+                                          {self.gradOutputs[step-1], self.gradCells[step-1]})
   accGradParametersThroughTime
   accUpdateGradParameters
 ```
