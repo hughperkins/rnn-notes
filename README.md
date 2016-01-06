@@ -1,6 +1,6 @@
 # RNN Notes
 
-My own notes on how [rnn](https://github.com/element-research/rnn) works.  Mostly derivatives from the rnn documentation, but supplemented a bit by reading the source code.
+Notes on how [rnn](https://github.com/element-research/rnn) works.  Mostly derivatives from the rnn documentation, but supplemented a bit by reading the source code.  Note that Colah's blog post on LSTM is really good http://colah.github.io/posts/2015-08-Understanding-LSTMs/ .
 
 ## Training process flow
 
@@ -10,7 +10,7 @@ My own notes on how [rnn](https://github.com/element-research/rnn) works.  Mostl
   - contains an nn.Linear and an nn.LogSoftMax
 - we train on each pair by doing:
   - net:forward(input)
-  - (get gradOutput from criterion; criterion usage doesnt change between backwardsonline or non-rnn usage, so we assume it works correctly)
+  - (get gradOutput from criterion; criterion works same for backwardsonline or non-rnn usage)
   - net:backward(input, gradOutput)
   - net:updateParameters(learningRate)
 - net:forward will do:
@@ -125,8 +125,8 @@ LSTM      => AbstractRecurrent => Container => Module
 ```
 Recursor:
   __init(module)                      self.recurrentModule = module; self.modules = {module}
-  updateOutput                        getStepModule (clones self.recurrentModule), stores input,
-                                      stores output, increments step
+  updateOutput                        getStepModule (clones self.recurrentModule),
+                                        stores input, stores output, increments step
   backwardThroughTime
   updateGradInputThroughTime
   accUpdateGradParametersThroughTime
@@ -136,10 +136,11 @@ Recursor:
 
 AbstractRecurrent:
   getStepModule(step)                 calls self.recurrentModule:stepClone(), stores in self.sharedClones
-                                      - stepClone is in `Module`, and basically does... nothing :-P
+                                      - stepClone is in `Module`
+                                      - for LSTM, is a nop, returns self
   maskZero
   updateGradInput                     self:updateGradInputThroughTime(self.updateGradInputStep, 1)
-                                      self.updateGradInputStep--
+                                        decrement self.updateGradInputStep
   accGradParameters
   backwardThroughTime                 nop
   updateGradInputThroughTime          nop
@@ -158,7 +159,7 @@ AbstractRecurrent:
 LSTM:
   __init                              self.recurrentModule = self:buildModel()
   buildModel
-  updateOutput                        self.outputs[step], self.cells[ste] = self.recurrentModel:updateOutput(
+  updateOutput                        self.outputs[step], self.cells[step] = self.recurrentModel:updateOutput(
                                         input, self.outputs[step-1], selfcells[step-1])
   backwardThroughTime
   updateGradInputThroughTime(step)    self.gradInputs[maxSteps-step], self.gradPrevOutput, self.gradCells[step-2] =
